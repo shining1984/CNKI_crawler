@@ -12,6 +12,9 @@ import re
 import time
 import httplib
 import Cookie
+from bs4 import BeautifulSoup
+
+
 def readtxt(path):
     url=[]
     with open(path,'r') as txt:
@@ -79,13 +82,93 @@ result2 = opener.open(req2)
 
 html2=result2.read()
 
-##with open('web2.html','w') as e:
-##    e.write(html2)
+with open('web2.html','w') as e:
+    e.write(html2)
 
 def Regular(html):
     reg='<a href="(.*?)"\ttarget'
     comlists=re.findall(re.compile(reg),html)
     return comlists
 
-t=Regular(html2)
-print t  
+#t=Regular(html2)
+#print html2  
+
+############################################################################################################
+#检查页面是否是验证码页面或者错误页面
+soup = BeautifulSoup(html2,"html.parser")
+contents = []
+#抽取文章列表
+#如果列表页有文章，抽取文章url和相关字段返回
+if soup.find('table', {"class":"GridTableContent"}):
+    articles = soup.find('table', {"class":"GridTableContent"}).find_all('tr')
+    if articles:
+    #循环抓取内容页,第一行是表头，不使用
+        for index in range(1, len(articles)):
+             #每篇文章的基本信息在不同的<td>中，第一个td是序号
+             article = articles[index].find_all('td')
+             content = {}
+
+             #文章序号
+             content["order"] = article[0].get_text()
+
+             #文章链接
+             if article[1].find('a') and article[1].find('a').get('href'):
+                 content["url"] = article[1].find('a').get('href')
+             #若文章链接不存在，则该篇文章不抓取
+             else:
+                 print "WARNING(" + time.strftime("%Y-%m-%d %H:%M:%S") + "):第" + str(content["order"]) + "篇文章没有链接，跳过，继续下一篇"
+                 continue
+             #标题，从js中检索
+             if article[1].find('script'):
+                 s = article[1].find('script').string
+                 s = s.replace("document.write(ReplaceChar1(ReplaceChar(ReplaceJiankuohao('", "")
+                 s = s.replace("'))));","")
+                 s = s.replace("<font class=Mark>","")
+                 s = s.replace("</font>","")
+                 content["title"] = s
+
+                 #每个作者位于一个<a>标签内
+                 content["authors"] = ""
+             if article[2].find_all('a'):
+                  authors = article[2].find_all('a')
+                  for author in authors:
+                      #结尾多了一个分号
+                      content["authors"] += author.get_text() +";"
+                 #来源期刊或机构
+             content["source"] = ""
+             if article[3].find("script"):
+                 s = article[3].find("script").get_text()
+                 k = re.findall(u"[\u4e00-\u9fa5]+\(?[\u4e00-\u9fa5]+\)?",s)
+                 if k:
+                     content["source"] = k[0]
+
+             #发表时间
+             content["time"] = ""
+             s = article[4].get_text()
+             s = s.replace("\r\n","")
+             s = s.strip()
+             content["time"] = s
+
+             #来源数据库，如期刊，硕士，博士等
+             content["db"] = ""
+             s = article[5].get_text()
+             s = s.replace("\r\n","")
+             s = s.strip()
+             content["db"] = s
+
+             #被引次数
+             content["cited"] = "0"
+             if article[6].find('a'):
+                 content["cited"] = article[6].find('a').get_text()
+
+             #下载次数
+             content["downloaded"] = "0"
+             if article[7].find("span", {"class" : "downloadCount"}):
+                 content["downloaded"] = article[7].find("span", {"class" : "downloadCount"}).get_text()
+             #存如contents列表里
+             contents.append(content)
+print (repr(contents).decode('unicode-escape'))
+file=open('mess','w')
+file.write(str(contents))
+file.close
+

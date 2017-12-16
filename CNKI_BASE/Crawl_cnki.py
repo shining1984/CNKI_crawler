@@ -9,7 +9,6 @@ class CNKI:
         #两个发送请求的主网页,知网需要两次发送请求,一次为参数请求,一次为返回页面请求
         url='http://epub.cnki.net/KNS/request/SearchHandler.ashx?action=&NaviCode=*&'
         url2='http://epub.cnki.net/kns/brief/brief.aspx?'
-	#url2='http://kns.cnki.net/kns/brief/default_result.aspx'
         
         #生成cookie
         cookie = cookielib.CookieJar()
