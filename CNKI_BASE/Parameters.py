@@ -7,9 +7,9 @@ import time
 def ToUtf(string):
     return string.decode('gbk').encode('utf8')
 
-search={'SU':'分异','TI':'分异'}
+search={'SU':'','TI':''}
 DbCatalog=ToUtf('中国学术文献网络出版总库')
-magazine=ToUtf('地理学报')
+magazine=ToUtf('历史研究')
 times=time.strftime('%a %b %d %Y %H:%M:%S')+' GMT+0800 (中国标准时间)'
 
 parameter={'ua':'1.21',
