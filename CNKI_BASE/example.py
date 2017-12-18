@@ -21,7 +21,7 @@ def readtxt(path):
         url=txt.readlines()
     return url
 '''登陆网页，读取网页'''
-hosturl='http://www.cnki.net/'
+#hosturl='http://www.cnki.net/'
 #生成cookie
 httplib.HTTPConnection.debuglevel = 1
 cookie = cookielib.CookieJar()
@@ -39,8 +39,8 @@ headers={'Connection':'Keep-Alive',
 
 #知网的参数编码是UTF8编码，所以中文需要先gbk解码再进行utf-8编码
 DbCatalog='中国学术文献网络出版总库'.decode('gbk').encode('utf8')
-magazine='地理学报'.decode('gbk').encode('utf8')
-txt='分异'.decode('gbk').encode('utf8')
+magazine='历史研究'.decode('gbk').encode('utf8')
+txt=''.decode('gbk').encode('utf8')
 times=time.strftime('%a %b %d %Y %H:%M:%S')+' GMT+0800 (中国标准时间)'
 parameters={'ua':'1.21',
             'PageName':'ASP.brief_result_aspx',
@@ -95,12 +95,31 @@ def Regular(html):
 
 ############################################################################################################
 #检查页面是否是验证码页面或者错误页面
+#soup = BeautifulSoup(html2,"html.parser")
 soup = BeautifulSoup(html2,"html.parser")
 contents = []
 #抽取文章列表
 #如果列表页有文章，抽取文章url和相关字段返回
+trs=soup.findAll('tr')
+print "tables length is "
+print len(trs)
+
+for tr in soup.findAll('tr'):
+    if tr.find('a') and tr.find('a').get('href') and tr.find('a').get('target'):
+        trsss = tr.find_all('td')
+        if trsss[1].find('script'):
+            s = tr.find('script').string
+            s = s.replace("document.write(ReplaceChar1(ReplaceChar(ReplaceJiankuohao('", "")
+            s = s.replace("'))));","")
+            s = s.replace("<font class=Mark>","")
+            s = s.replace("</font>","")
+            print s
+#            print td.getText()
+
 if soup.find('table', {"class":"GridTableContent"}):
     articles = soup.find('table', {"class":"GridTableContent"}).find_all('tr')
+    #articles = soup.find('', {"class":""}).find_all('tr')
+    print len(articles)
     if articles:
     #循环抓取内容页,第一行是表头，不使用
         for index in range(1, len(articles)):
@@ -167,8 +186,8 @@ if soup.find('table', {"class":"GridTableContent"}):
                  content["downloaded"] = article[7].find("span", {"class" : "downloadCount"}).get_text()
              #存如contents列表里
              contents.append(content)
+
+
 print (repr(contents).decode('unicode-escape'))
-file=open('mess','w')
-file.write(str(contents))
-file.close
+
 
