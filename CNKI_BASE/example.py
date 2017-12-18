@@ -94,29 +94,74 @@ def Regular(html):
 #print html2  
 
 ############################################################################################################
-#检查页面是否是验证码页面或者错误页面
-#soup = BeautifulSoup(html2,"html.parser")
+
 soup = BeautifulSoup(html2,"html.parser")
 contents = []
-#抽取文章列表
-#如果列表页有文章，抽取文章url和相关字段返回
-trs=soup.findAll('tr')
-print "tables length is "
-print len(trs)
-
 for tr in soup.findAll('tr'):
-    if tr.find('a') and tr.find('a').get('href') and tr.find('a').get('target'):
-        trsss = tr.find_all('td')
-        if trsss[1].find('script'):
-            s = tr.find('script').string
-            s = s.replace("document.write(ReplaceChar1(ReplaceChar(ReplaceJiankuohao('", "")
-            s = s.replace("'))));","")
-            s = s.replace("<font class=Mark>","")
-            s = s.replace("</font>","")
-            print s
-#            print td.getText()
+    content = {}
+    article = tr.find_all('td')
+    if tr.find('a') and tr.find('a').get('href') and tr.find('a').get('target') and article[1].find('script'):
 
-if soup.find('table', {"class":"GridTableContent"}):
+########################################################################################
+        #Get the article number
+        content["order"] = ""
+        content["order"] = article[0].get_text()
+        print content["order"]
+        #Get the article title
+        content["title"] = ""
+        s = tr.find('script').string
+        s = s.replace("document.write(ReplaceChar1(ReplaceChar(ReplaceJiankuohao('", "")
+        s = s.replace("'))));","")
+        s = s.replace("<font class=Mark>","")
+        s = s.replace("</font>","")
+        content["title"] = s
+        print content["title"]
+        #Get the article authors
+        content["authors"] = ""
+        if article[2].find_all('a'):
+            authors = article[2].find_all('a')
+            for author in authors:
+                content["authors"] += author.get_text() +";"
+        print content["authors"]
+        #The org of the article come from
+        content["source"] = ""
+        if article[3].find("script"):
+            s = article[3].find("script").get_text()
+            k = re.findall(u"[\u4e00-\u9fa5]+\(?[\u4e00-\u9fa5]+\)?",s)
+            if k:
+                content["source"] = k[0]
+        print content["source"]
+        #发表时间
+        content["time"] = ""
+        s = article[4].get_text()
+        s = s.replace("\r\n","")
+        s = s.strip()
+        content["time"] = s
+        print content["time"]
+        #来源数据库，如期刊，硕士，博士等
+        content["db"] = ""
+        s = article[5].get_text()
+        s = s.replace("\r\n","")
+        s = s.strip()
+        content["db"] = s
+        print content["db"]
+        #被引次数
+        content["cited"] = "0"
+        if article[6].find('a'):
+            content["cited"] = article[6].find('a').get_text()
+        print content["cited"]
+        #下载次数
+        content["downloaded"] = "0"
+        if article[7].find("span", {"class" : "downloadCount"}):
+            content["downloaded"] = article[7].find("span", {"class" : "downloadCount"}).get_text()
+        print content["downloaded"]
+        #存如contents列表里
+        contents.append(content)
+######################################################################################
+        print "#######################################"
+#############################################################################
+print contents
+'''if soup.find('table', {"class":"GridTableContent"}):
     articles = soup.find('table', {"class":"GridTableContent"}).find_all('tr')
     #articles = soup.find('', {"class":""}).find_all('tr')
     print len(articles)
@@ -188,6 +233,6 @@ if soup.find('table', {"class":"GridTableContent"}):
              contents.append(content)
 
 
-print (repr(contents).decode('unicode-escape'))
+print (repr(contents).decode('unicode-escape'))'''
 
 
