@@ -13,6 +13,7 @@ import time
 import httplib
 import Cookie
 from bs4 import BeautifulSoup
+import xlsxwriter
 
 
 def readtxt(path):
@@ -90,7 +91,10 @@ def Regular(html):
     return comlists
 
 #t=Regular(html2)
-#print html2  
+#print html2
+######################################################################################
+
+
 
 ############################################################################################################
 
@@ -129,7 +133,8 @@ for tr in soup.findAll('tr'):
             k = re.findall(u"[\u4e00-\u9fa5]+\(?[\u4e00-\u9fa5]+\)?",s)
             if k:
                 content["source"] = k[0]
-        print content["source"]
+        #print content["source"]
+            print s
         #发表时间
         content["time"] = ""
         s = article[4].get_text()
@@ -154,9 +159,43 @@ for tr in soup.findAll('tr'):
         if article[7].find("span", {"class" : "downloadCount"}):
             content["downloaded"] = article[7].find("span", {"class" : "downloadCount"}).get_text()
         print content["downloaded"]
-        #存如contents列表里
+        #存如contents列表里,contents is a List
         contents.append(content)
 ######################################################################################
-        print "#######################################"
-#############################################################################
 print contents
+#############################################################################
+workbook = xlsxwriter.Workbook('History.xlsx')
+worksheet = workbook.add_worksheet()
+row = 0
+col = 0
+i = 0
+
+worksheet.write(row, col,     "order")
+worksheet.write(row, col + 1, "title")
+worksheet.write(row, col + 2, "authors")
+worksheet.write(row, col + 3, "source")
+worksheet.write(row, col + 4, "db")
+worksheet.write(row, col + 5, "time")
+worksheet.write(row, col + 6, "cited")
+worksheet.write(row, col + 7, "downloaded")
+row += 1
+
+
+for order,title,authors,source,time,db,cited,downloaded in (contents):
+    cont = contents[i]
+    worksheet.write(row, col,     cont[downloaded])
+    worksheet.write(row, col + 1, cont[order])
+    worksheet.write(row, col + 2, cont[source])
+    worksheet.write(row, col + 3, cont[db])
+    worksheet.write(row, col + 4, cont[time])
+    worksheet.write(row, col + 5, cont[cited])
+    worksheet.write(row, col + 6, cont[authors])
+    worksheet.write(row, col + 7, cont[title])
+    row += 1
+    i += 1
+
+workbook.close()
+
+
+
+
