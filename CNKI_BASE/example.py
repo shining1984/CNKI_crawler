@@ -128,13 +128,11 @@ for tr in soup.findAll('tr'):
         print content["authors"]
         #The org of the article come from
         content["source"] = ""
-        if article[3].find("script"):
-            s = article[3].find("script").get_text()
-            k = re.findall(u"[\u4e00-\u9fa5]+\(?[\u4e00-\u9fa5]+\)?",s)
-            if k:
-                content["source"] = k[0]
-        #print content["source"]
-            print s
+        s = article[3].get_text()
+        k = re.findall(u"[\u4e00-\u9fa5]+\(?[\u4e00-\u9fa5]+\)?",s)
+        if k:
+            content["source"] = k[0]
+        print content["source"]
         #发表时间
         content["time"] = ""
         s = article[4].get_text()
@@ -174,8 +172,8 @@ worksheet.write(row, col,     "order")
 worksheet.write(row, col + 1, "title")
 worksheet.write(row, col + 2, "authors")
 worksheet.write(row, col + 3, "source")
-worksheet.write(row, col + 4, "db")
-worksheet.write(row, col + 5, "time")
+worksheet.write(row, col + 4, "time")
+worksheet.write(row, col + 5, "db")
 worksheet.write(row, col + 6, "cited")
 worksheet.write(row, col + 7, "downloaded")
 row += 1
@@ -187,15 +185,11 @@ for order,title,authors,source,time,db,cited,downloaded in (contents):
     worksheet.write(row, col + 1, cont[order])
     worksheet.write(row, col + 2, cont[source])
     worksheet.write(row, col + 3, cont[db])
-    worksheet.write(row, col + 4, cont[time])
-    worksheet.write(row, col + 5, cont[cited])
+    worksheet.write(row, col + 4, cont[cited])
+    worksheet.write(row, col + 5, cont[time])
     worksheet.write(row, col + 6, cont[authors])
     worksheet.write(row, col + 7, cont[title])
     row += 1
     i += 1
 
 workbook.close()
-
-
-
-
