@@ -66,15 +66,16 @@ query_string=urllib.urlencode({'pagename':'ASP.brief_result_aspx','DbCatalog':'Ö
                                })
 #·¢ËÍÇëÇó
 
-
 url='http://epub.cnki.net/KNS/request/SearchHandler.ashx?action=&NaviCode=*&'
 url2='http://epub.cnki.net/kns/brief/brief.aspx?'
+url3='http://epub.cnki.net/kns/brief/brief.aspx'
 #ĞèÒªÁ½²½Ìá½»£¬µÚÒ»²¿Ìá½»ÇëÇó£¬µÚ¶ş²½ÏÂÔØ¿ò¼Ü
 req=urllib2.Request(url+postdata,headers=headers)
 html=opener.open(req).read()
 
 
 req2=urllib2.Request(url2+query_string,headers=headers)
+#req2=urllib2.Request(urlxxx,headers=headers)
 
 #print req.get_header(),req.header_items()
 #´ò¿ªÍøÒ³£¬µÇÂ½³É¹¦
@@ -160,7 +161,29 @@ for tr in soup.findAll('tr'):
         #´æÈçcontentsÁĞ±íÀï,contents is a List
         contents.append(content)
 ######################################################################################
-print contents
+#print contents
+next_page_name='ÏÂÒ»Ò³'.decode('gbk').encode('UTF-8')
+print next_page_name
+linkstr = soup.find('', {"class":"TitleLeftCell"}).find_all('a')
+for link in linkstr:
+    titlevalue = link.get_text().encode('UTF-8')
+    if (titlevalue == next_page_name):
+        nexturl = link.get('href')
+        print nexturl
+#################
+req3=urllib2.Request(url3 + nexturl, headers=headers)
+result3 = opener.open(req3)
+html3=result3.read()
+with open('web3.html','w') as e:
+    e.write(html3)
+#print html3
+'''
+    for (link in linkstr:
+        titlevalue=link.gettext()
+        if (titlevalue=='ÏÂÒ»Ò³'):
+            nexturl = link.get('href')
+            print nexturl
+'''
 #############################################################################
 workbook = xlsxwriter.Workbook('History.xlsx')
 worksheet = workbook.add_worksheet()
